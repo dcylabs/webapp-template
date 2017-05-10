@@ -1,0 +1,37 @@
+version: '3'
+services: 
+  mysql: 
+    container_name: webapp_mysql
+    image: mysql 
+    environment: 
+      - MYSQL_ROOT_PASSWORD=root
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/mysql:/var/lib/mysql
+  cron: 
+    container_name: webapp_cron
+    build: images/cron
+    links:
+      - mysql:mysql
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro    
+      - ./data/www:/var/www/html     
+  php: 
+    container_name: webapp_php
+    build: images/php
+    links:
+      - mysql:mysql
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro   
+      - ./data/www:/var/www/html
+  nginx: 
+    container_name: webapp_nginx
+    image: nginx
+    links:
+      - php:php-fpm
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro  
+      - ./data/www:/var/www/html
+      - ./data/conf/nginx.conf:/etc/nginx/conf.d/default.conf 
+    ports:
+      - 80:80
